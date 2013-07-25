@@ -27,8 +27,8 @@ def get_ip(request):
             try:
                 validate_ipv6_address(ip_address)
             except ValidationError:
-                ip_address = 'unknown'
+                ip_address = '10.0.0.1'
     else:
-        ip_address = 'unknown'
+        ip_address = '10.0.0.1'
 
     return ip_address
