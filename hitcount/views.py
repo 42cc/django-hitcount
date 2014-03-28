@@ -25,7 +25,8 @@ def _update_hit_count(request, hitcount):
 
     session_key = request.session.session_key
     ip = get_ip(request)
-    user_agent = request.META.get('HTTP_USER_AGENT', '')[:255]
+    user_agent = request.META.get('HTTP_USER_AGENT', '')\
+        .decode('utf-8', errors='replace').encode('utf-8')[:255]
     hits_per_ip_limit = getattr(settings, 'HITCOUNT_HITS_PER_IP_LIMIT', 0)
     exclude_user_group = getattr(settings,
                             'HITCOUNT_EXCLUDE_USER_GROUP', None)
