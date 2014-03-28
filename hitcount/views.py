@@ -1,12 +1,12 @@
 from django.http import (
-    Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+    HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 )
 from django.utils import simplejson
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 
 from hitcount.utils import get_ip
 from hitcount.models import Hit, HitCount, BlacklistIP, BlacklistUserAgent
+
 
 def _update_hit_count(request, hitcount):
     '''
@@ -25,7 +25,8 @@ def _update_hit_count(request, hitcount):
 
     session_key = request.session.session_key
     ip = get_ip(request)
-    user_agent = request.META.get('HTTP_USER_AGENT', '')[:255]
+    user_agent = request.META.get('HTTP_USER_AGENT', '')\
+        .decode('utf-8', errors='replace').encode('utf-8')[:255]
     hits_per_ip_limit = getattr(settings, 'HITCOUNT_HITS_PER_IP_LIMIT', 0)
     exclude_user_group = getattr(settings,
                             'HITCOUNT_EXCLUDE_USER_GROUP', None)
@@ -52,7 +53,7 @@ def _update_hit_count(request, hitcount):
     hit = Hit(  session=session_key,
                 hitcount=hitcount,
                 ip=get_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],)
+                user_agent=user_agent)
 
     # first, use a user's authentication to see if they made an earlier hit
     if user.is_authenticated():

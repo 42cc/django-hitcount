@@ -12,7 +12,8 @@ urlpatterns = patterns("",
     url(r"^hit$", "hitcount.views.update_hit_count_ajax"),
 )
 
-class AjaxViewTestCase(TestCase):
+
+class SetupTestCase(TestCase):
     urls = "hitcount.tests"
 
     def setUp(self):
@@ -29,6 +30,9 @@ class AjaxViewTestCase(TestCase):
             kwargs["HTTP_X_REQUESTED_WITH"] = "XMLHttpRequest"
 
         return do_request("/hit", {"hitcount_pk": pk}, **kwargs)
+
+
+class AjaxViewTestCase(SetupTestCase):
 
     def test_get_should_return_405(self):
         resp = self._request(method="get", pk=self.hitcount_1.pk)
@@ -86,3 +90,12 @@ class AjaxViewTestCase(TestCase):
         data = json.loads(resp.content)
         new_hits = HitCount.objects.get(pk=pk).hits
         self.assertEqual(int(data["hits"]), new_hits)
+
+
+class MainLogicTestCase(SetupTestCase):
+
+    def test_surrogate_pairs(self):
+        client = Client(HTTP_USER_AGENT=b'\xf1\x61\x3b\x46')
+        pk=self.hitcount_1.pk
+        resp = self._request(pk=pk, client=client)
+        self.assertEqual(resp.status_code, 200)
